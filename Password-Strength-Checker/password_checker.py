@@ -11,50 +11,88 @@ COMMON_PASSWORDS = [
     "iloveyou"
 ]
 
+SPECIAL_CHARACTERS = "!@#$%^&*"
+
 
 def check_password(password):
     score = 0
     suggestions = []
 
-    special_characters = "!@#$%^&*"
-
-    # Check if password is commonly used
     if password.lower() in COMMON_PASSWORDS:
-        suggestions.append("This is a common password. Choose something more unique.")
+        score -= 3
+        suggestions.append(
+            "This is a commonly used password. Choose something more unique."
+        )
+
+    if len(password) < 8:
+        suggestions.append("Use at least 8 characters.")
+    elif len(password) >= 12:
+        score += 2
     else:
         score += 1
 
-    # Check length
-    if len(password) >= 8:
-        score += 1
-    else:
-        suggestions.append("Use at least 8 characters")
-
-    # Check uppercase
     if any(char.isupper() for char in password):
         score += 1
     else:
-        suggestions.append("Add an uppercase letter")
+        suggestions.append("Add an uppercase letter.")
 
-    # Check lowercase
     if any(char.islower() for char in password):
         score += 1
     else:
-        suggestions.append("Add a lowercase letter")
+        suggestions.append("Add a lowercase letter.")
 
-    # Check number
     if any(char.isdigit() for char in password):
         score += 1
     else:
-        suggestions.append("Add a number")
+        suggestions.append("Add a number.")
 
-    # Check special character
-    if any(char in special_characters for char in password):
+    if any(char in SPECIAL_CHARACTERS for char in password):
         score += 1
     else:
-        suggestions.append("Add a special character")
+        suggestions.append("Add a special character.")
+
+    if len(set(password)) < len(password) * 0.7:
+        score -= 1
+        suggestions.append("Avoid using too many repeated characters.")
+
+    lower_password = password.lower()
+
+    sequences = [
+        "123",
+        "234",
+        "345",
+        "456",
+        "567",
+        "678",
+        "789",
+        "abc",
+        "bcd",
+        "cde",
+        "def",
+        "qwe",
+        "wer",
+        "ert"
+    ]
+
+    if any(sequence in lower_password for sequence in sequences):
+        score -= 1
+        suggestions.append(
+            "Avoid predictable sequences such as 123 or abc."
+        )
+
+    if score < 0:
+        score = 0
 
     return score, suggestions
+
+
+def get_strength(score):
+    if score <= 2:
+        return "WEAK"
+    elif score <= 4:
+        return "MEDIUM"
+    else:
+        return "STRONG"
 
 
 print("================================")
@@ -64,15 +102,10 @@ print("================================")
 password = input("\nEnter your password: ")
 
 score, suggestions = check_password(password)
+strength = get_strength(score)
 
-print("\nScore:", score, "/ 6")
-
-if score <= 2:
-    print("Strength: WEAK")
-elif score <= 4:
-    print("Strength: MEDIUM")
-else:
-    print("Strength: STRONG")
+print("\nPassword Score:", score, "/ 6")
+print("Strength:", strength)
 
 if suggestions:
     print("\nSuggestions:")
@@ -81,4 +114,3 @@ if suggestions:
         print("-", suggestion)
 else:
     print("\nExcellent! Your password meets all requirements.")
-    
