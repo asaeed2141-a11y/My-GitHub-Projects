@@ -1,3 +1,7 @@
+import random
+import string
+
+
 COMMON_PASSWORDS = [
     "password",
     "123456",
@@ -51,7 +55,7 @@ def check_password(password):
     else:
         suggestions.append("Add a special character.")
 
-    if len(set(password)) < len(password) * 0.7:
+    if len(password) > 0 and len(set(password)) < len(password) * 0.7:
         score -= 1
         suggestions.append("Avoid using too many repeated characters.")
 
@@ -95,22 +99,90 @@ def get_strength(score):
         return "STRONG"
 
 
-print("================================")
-print("   PASSWORD STRENGTH CHECKER")
-print("================================")
+def generate_password(length):
+    characters = (
+        string.ascii_letters +
+        string.digits +
+        SPECIAL_CHARACTERS
+    )
 
-password = input("\nEnter your password: ")
+    password = ""
 
-score, suggestions = check_password(password)
-strength = get_strength(score)
+    for _ in range(length):
+        password += random.choice(characters)
 
-print("\nPassword Score:", score, "/ 6")
-print("Strength:", strength)
+    return password
 
-if suggestions:
-    print("\nSuggestions:")
 
-    for suggestion in suggestions:
-        print("-", suggestion)
-else:
-    print("\nExcellent! Your password meets all requirements.")
+def check_password_mode():
+    print("\n================================")
+    print("      PASSWORD CHECKER")
+    print("================================")
+
+    password = input("\nEnter your password: ")
+
+    score, suggestions = check_password(password)
+    strength = get_strength(score)
+
+    print("\nPassword Score:", score, "/ 6")
+    print("Strength:", strength)
+
+    if suggestions:
+        print("\nSuggestions:")
+
+        for suggestion in suggestions:
+            print("-", suggestion)
+    else:
+        print("\nExcellent! Your password meets all requirements.")
+
+
+def generate_password_mode():
+    print("\n================================")
+    print("      PASSWORD GENERATOR")
+    print("================================")
+
+    while True:
+        try:
+            length = int(input("\nEnter password length (8-50): "))
+
+            if 8 <= length <= 50:
+                break
+
+            print("Please enter a length between 8 and 50.")
+
+        except ValueError:
+            print("Please enter a valid number.")
+
+    password = generate_password(length)
+
+    print("\nGenerated Password:")
+    print(password)
+
+
+def main():
+    while True:
+        print("\n================================")
+        print("     PASSWORD SECURITY TOOL")
+        print("================================")
+
+        print("\n1. Check password strength")
+        print("2. Generate secure password")
+        print("3. Exit")
+
+        choice = input("\nChoose an option: ")
+
+        if choice == "1":
+            check_password_mode()
+
+        elif choice == "2":
+            generate_password_mode()
+
+        elif choice == "3":
+            print("\nGoodbye!")
+            break
+
+        else:
+            print("\nInvalid option. Please choose 1, 2, or 3.")
+
+
+main()
