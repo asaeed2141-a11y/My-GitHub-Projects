@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Integrity Results</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <nav class="navbar">
+        <a href="/">🏠 Dashboard</a>
+        <a href="/status">📊 Status</a>
+        <a href="/view-logs">📋 Security Logs</a>
+    </nav>
+
+
+    <h1>🔐 Integrity Report</h1>
+
+    <p class="subtitle">
+        File integrity scan results
+    </p>
+
+<p>
+    🕒 Last scan:
+    <strong>{{ scan_time }}</strong>
+</p>
+
+<p>
+    📁 Monitored folder:
+    <strong>{{ folder }}</strong>
+</p>
+
+    {% if status == "secure" %}
+
+        <div class="security-status secure">
+            🟢 System Secure
+            <p>No integrity changes were detected.</p>
+        </div>
+
+    {% elif status == "changes" %}
+
+        <div class="security-status changes">
+            🔴 Changes Detected
+            <p>Changes were found in the monitored files.</p>
+        </div>
+
+    {% endif %}
+
+
+    <div class="card">
+
+        <h2>📊 Scan Summary</h2>
+
+        <p>
+            Changes detected:
+            <strong>{{ results.total_changes }}</strong>
+        </p>
+
+        <p>
+            🟢 Unchanged:
+            <strong>{{ results.unchanged|length }}</strong>
+        </p>
+
+        <p>
+            🟠 Modified:
+            <strong>{{ results.modified|length }}</strong>
+        </p>
+
+        <p>
+            🔵 Added:
+            <strong>{{ results.added|length }}</strong>
+        </p>
+
+        <p>
+            🔴 Deleted:
+            <strong>{{ results.deleted|length }}</strong>
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2 class="modified">🟠 Modified Files</h2>
+
+        {% if results.modified %}
+
+            <ul>
+                {% for file in results.modified %}
+                    <li>{{ file }}</li>
+                {% endfor %}
+            </ul>
+
+        {% else %}
+
+            <p>No modified files.</p>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="card">
+
+        <h2 class="added">🔵 Added Files</h2>
+
+        {% if results.added %}
+
+            <ul>
+                {% for file in results.added %}
+                    <li>{{ file }}</li>
+                {% endfor %}
+            </ul>
+
+        {% else %}
+
+            <p>No added files.</p>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="card">
+
+        <h2 class="deleted">🔴 Deleted Files</h2>
+
+        {% if results.deleted %}
+
+            <ul>
+                {% for file in results.deleted %}
+                    <li>{{ file }}</li>
+                {% endfor %}
+            </ul>
+
+        {% else %}
+
+            <p>No deleted files.</p>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="card">
+
+        <h2 class="unchanged">🟢 Unchanged Files</h2>
+
+        {% if results.unchanged %}
+
+            <ul>
+                {% for file in results.unchanged %}
+                    <li>{{ file }}</li>
+                {% endfor %}
+            </ul>
+
+        {% else %}
+
+            <p>No unchanged files.</p>
+
+        {% endif %}
+
+    </div>
+
+
+    <a href="/">
+        <button>← Back to Dashboard</button>
+    </a>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+    "files": [
+        "baseline.json",
+        "integrity.log"
+    ],
+    "folders": [
+        ".git",
+        "__pycache__"
+    ]
+}

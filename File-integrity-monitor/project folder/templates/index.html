@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Integrity Monitor</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <nav class="navbar">
+        <a href="/">🏠 Dashboard</a>
+        <a href="/status">📊 Status</a>
+        <a href="/view-logs">📋 Security Logs</a>
+    </nav>
+
+
+    <h1>🔐 File Integrity Monitor</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            {% for category, message in messages %}
+
+                <div class="flash {{ category }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <p class="subtitle">
+        Security & File Protection Dashboard
+    </p>
+
+
+    {% if results %}
+
+        <div class="card">
+
+            <h2>📊 Latest Scan</h2>
+
+            {% if status == "secure" %}
+
+                <p class="secure-text">
+                    🟢 <strong>System Secure</strong>
+                </p>
+
+            {% elif status == "changes" %}
+
+                <p class="changes-text">
+                    🔴 <strong>Changes Detected</strong>
+                </p>
+
+            {% endif %}
+
+            <p>
+                📁 Monitored folder:
+                <strong>{{ folder }}</strong>
+            </p>
+
+            <p>
+                🕒 Last scan:
+                <strong>{{ scan_time }}</strong>
+            </p>
+
+            <p>
+                ⚠️ Total changes:
+                <strong>{{ results.total_changes }}</strong>
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <h2>📈 Scan Statistics</h2>
+
+            <p>
+                📁 Files checked:
+                <strong>
+                    {{ results.unchanged|length + results.modified|length + results.added|length }}
+                </strong>
+            </p>
+
+            <p>
+                🟢 Unchanged:
+                <strong>{{ results.unchanged|length }}</strong>
+            </p>
+
+            <p>
+                🟠 Modified:
+                <strong>{{ results.modified|length }}</strong>
+            </p>
+
+            <p>
+                🔵 Added:
+                <strong>{{ results.added|length }}</strong>
+            </p>
+
+            <p>
+                🔴 Deleted:
+                <strong>{{ results.deleted|length }}</strong>
+            </p>
+
+        </div>
+
+    {% else %}
+
+        <div class="card">
+
+            <h2>🛡️ No Scan Performed</h2>
+
+            <p>
+                Create a baseline and run an integrity check to see
+                your security status here.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <div class="card">
+
+        <h2>🛡️ Create Baseline</h2>
+
+        <p>
+            Select a folder to monitor and create a secure file baseline.
+        </p>
+
+        <form method="POST" action="/create-baseline">
+
+            <label for="folder">
+                Folder to monitor:
+            </label>
+
+            <input
+                type="text"
+                id="folder"
+                name="folder"
+                placeholder="Enter folder path"
+                required
+            >
+
+            <button type="submit">
+                Create Baseline
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>🔎 Check Integrity</h2>
+
+        <p>
+            Compare the current files against your saved baseline.
+        </p>
+
+        <form method="POST" action="/check-integrity">
+
+            <label for="check-folder">
+                Folder to check:
+            </label>
+
+            <input
+                type="text"
+                id="check-folder"
+                name="folder"
+                placeholder="Enter folder path"
+                required
+            >
+
+            <button type="submit">
+                Check Integrity
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>🚫 Add Exclusion</h2>
+
+        <p>
+            Exclude a specific file or folder from integrity monitoring.
+        </p>
+
+        <form method="POST" action="/add-exclusion">
+
+            <label for="exclusion">
+                File or folder name:
+            </label>
+
+            <input
+                type="text"
+                id="exclusion"
+                name="exclusion"
+                placeholder="Example: test.txt"
+                required
+            >
+
+            <label for="type">
+                Exclusion type:
+            </label>
+
+            <select id="type" name="type" required>
+
+                <option value="files">
+                    File
+                </option>
+
+                <option value="folders">
+                    Folder
+                </option>
+
+            </select>
+
+            <button type="submit">
+                Add Exclusion
+            </button>
+
+        </form>
+
+
+        <h3>Current Exclusions</h3>
+
+
+        {% if exclusions.files %}
+
+            <p>
+                <strong>📄 Excluded Files:</strong>
+            </p>
+
+            <ul>
+
+                {% for file in exclusions.files %}
+
+                    <li>
+
+                        {{ file }}
+
+                        <form
+                            method="POST"
+                            action="/remove-exclusion"
+                            style="display: inline;"
+                        >
+
+                            <input
+                                type="hidden"
+                                name="exclusion"
+                                value="{{ file }}"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="type"
+                                value="files"
+                            >
+
+                            <button
+                                type="submit"
+                                class="danger-button"
+                            >
+                                Remove
+                            </button>
+
+                        </form>
+
+                    </li>
+
+                {% endfor %}
+
+            </ul>
+
+        {% else %}
+
+            <p>
+                No excluded files.
+            </p>
+
+        {% endif %}
+
+
+        {% if exclusions.folders %}
+
+            <p>
+                <strong>📁 Excluded Folders:</strong>
+            </p>
+
+            <ul>
+
+                {% for folder in exclusions.folders %}
+
+                    <li>
+
+                        {{ folder }}
+
+                        <form
+                            method="POST"
+                            action="/remove-exclusion"
+                            style="display: inline;"
+                        >
+
+                            <input
+                                type="hidden"
+                                name="exclusion"
+                                value="{{ folder }}"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="type"
+                                value="folders"
+                            >
+
+                            <button
+                                type="submit"
+                                class="danger-button"
+                            >
+                                Remove
+                            </button>
+
+                        </form>
+
+                    </li>
+
+                {% endfor %}
+
+            </ul>
+
+        {% else %}
+
+            <p>
+                No excluded folders.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>📋 Security Logs</h2>
+
+        <p>
+            View recorded file integrity events and security activity.
+        </p>
+
+        <form method="GET" action="/view-logs">
+
+            <button
+                type="submit"
+                class="secondary-button"
+            >
+                View Logs
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>
